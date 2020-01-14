@@ -1,26 +1,72 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {Component} from 'react';
+import Header from './components/header/header';
+import Listado from './components/listado/listado';
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends Component{
+
+  state = {
+    query:'',
+    results:[],
+    page:6
+  }
+
+  render(){
+
+    return (
+      <div className="App">
+        <Header 
+        searchRepo={this.searchRepo} 
+        page={this.state.page}/>
+        <hr />
+        <div className="container">
+          <Listado 
+          results={this.state.results} 
+          searchRepo={this.searchRepo} 
+          query={this.state.query} 
+          page={this.state.page} />
+        </div>
+        <hr />
+      </div>
+    );
+  }
+  searchRepo = (query, add) =>{
+    
+    if(query.trim().length>3){
+      
+      let page = this.state.page;
+
+      if(add){
+        
+        page+=5;
+        
+        this.setState({
+          page:this.state.page + 5
+        });
+
+      }else{
+
+        page = 6;
+
+        this.setState({
+          page:6
+        });
+      }
+
+      const url = `https://api.github.com/search/repositories?q=${query}&per_page=${page}`;
+      
+      fetch(url)
+      .then(result => result.json())
+      .then(data=>{
+        this.setState({
+          query:query,
+          results:data.items,
+        });
+        console.log(data);
+        console.log(this.state.page);
+      });
+    }
+  }
 }
 
 export default App;
